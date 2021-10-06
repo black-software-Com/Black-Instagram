@@ -1,0 +1,99 @@
+#!/usr/bin/python3
+# Black-Instagram v1.0
+import os
+import webbrowser
+from instabot import Bot
+from tkinter import *
+from tkinter.ttk import Entry
+from tkinter.ttk import Button as TButton
+from tkinter.ttk import Label as TLabel
+from tkinter.messagebox import *
+from tkinter.colorchooser import askcolor
+from tkinter.filedialog import askopenfile
+
+from instabot.bot.state.bot_state import BotState
+
+class black_instagram(Tk):
+    def __init__(self):
+        super(black_instagram,self).__init__()
+        self.title('Black-Instagram')
+        self.menu = Menu(self)
+        self.aboutmenu = Menu(self.menu,tearoff=0)
+        self.filemenu = Menu(self.menu,tearoff=0)
+        self.aboutmenu.add_command(label='Help',accelerator='F1',command=lambda x: self.help(x))
+        self.aboutmenu.add_command(label='Black',accelerator='F2',command=lambda x: self.black(x))
+        self.aboutmenu.add_separator()
+        self.aboutmenu.add_command(label='Exit',accelerator='Alt + F4',command=self.ext)
+        self.filemenu.add_radiobutton(label='Dark',command=self.dark)
+        self.filemenu.add_radiobutton(label='Light',command=self.light)
+        self.filemenu.add_radiobutton(label='Customize',command=self.customize)
+        self.menu.add_cascade(label='About',menu=self.aboutmenu)
+        self.menu.add_cascade(label='Theme',menu=self.filemenu)
+        self.config(menu=self.menu)
+        self.geometry("500x400")
+        self.resizable(0,0)
+        self.bind("<F1>",lambda x: self.help(x))
+        self.bind("<F2>",lambda x: self.black(x))
+        self.user = Entry(self,width=15)
+        self.user.pack(padx=5,pady=5)
+        self.user.insert(0,"User")
+        self.password = Entry(self,width=15,show="*")
+        self.password.pack(padx=5,pady=5)
+        self.repassword = Entry(self,width=15,show="*")
+        self.repassword.pack(padx=5,pady=5)
+        self.caption = Entry(self,width=15)
+        self.caption.pack(padx=5,pady=5)
+        self.image = Button(self,text='Import Image',width=9,height=2,command=self.image_import)
+        self.image.pack(padx=4,pady=4)
+        upload = TButton(self,text='Upload',command=self.upload_photo)
+        upload.pack(padx=1,pady=1)
+        exit = TButton(self,text='Exit',command=self.ext)
+        exit.pack(padx=5,pady=5)
+
+        self.mainloop()
+    def image_import(self):
+        global image_file
+        image_file = askopenfile(title='Choose File')
+    def dark(self):
+        self.account_label.config(background='black',foreground='green')
+        self.config(background='black')
+    def light(self):
+        self.account_label.config(background='white',foreground='black')        
+        self.config(background='white')
+    def customize(self):
+        color = askcolor(title='Choose Color')
+        self.config(background=color[1])
+    def upload_photo(self):
+        x = []
+        if self.user.get():
+            x.append(1)
+            if self.password.get():
+              x.append(2)
+              if self.image.get():
+                  x.append(3)
+                  if self.caption.get():
+                      x.append(4)
+                      try:
+                          status = True
+                          bot = Bot()
+                          bot.login(username=self.user.get(),password=self.password.get())
+                          bot.upload_photo(image_file,caption=self.caption.get())
+                          self.account_label = TLabel(self,text=self.user.get())
+                          self.account_label.pack(side = BOTTOM)
+                      except (Exception,TabError):
+                          showerror(title='Cannot Connecting',message=f'Cannot Connecting To Account: {self.use.get()}')
+
+        else:
+            if not len(x) == 4:
+                showerror(title='Cannot Connecting',message=f'Please, Check User,Password,Image,Caption!')
+    def help(self,x):
+        webbrowser.open_new_tab('')
+    def black(self,x):
+        webbrowser.open_new_tab('https://github.com/black-software-com')
+    def ext(self):
+        self.destroy()
+        self.quit()
+        quit()
+
+if __name__ == '__main__':
+    window = black_instagram()
